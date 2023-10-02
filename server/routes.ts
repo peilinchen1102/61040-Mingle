@@ -30,8 +30,8 @@ class Routes {
     WebSession.isLoggedOut(session);
     const user = await User.create(username, password);
     const userInfo = await User.getUserByUsername(username);
-    await Profile.create(userInfo._id, name, major, year, courses);
-    return user;
+    const profile = await Profile.create(userInfo._id, name, major, year, courses);
+    return { user: user, profile: profile };
   }
 
   @Router.patch("/users")
@@ -44,7 +44,7 @@ class Routes {
   async deleteUser(session: WebSessionDoc) {
     const user = WebSession.getUser(session);
     WebSession.end(session);
-    return await User.delete(user);
+    return { user: await User.delete(user), profile: await Profile.delete(user) };
   }
 
   @Router.post("/login")
@@ -138,6 +138,11 @@ class Routes {
     const user = WebSession.getUser(session);
     const fromId = (await User.getUserByUsername(from))._id;
     return await Friend.rejectRequest(fromId, user);
+  }
+
+  @Router.get("/profiles")
+  async getProfiles() {
+    return Responses.profiles(await Profile.getProfiles());
   }
 
   @Router.get("/profiles/:username")

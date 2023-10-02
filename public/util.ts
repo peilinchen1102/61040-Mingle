@@ -78,7 +78,7 @@ const operations: operation[] = [
     fields: { id: "input" },
   },
   {
-    name: "Get Profile (empty for all)",
+    name: "Get Profiles (empty for all)",
     endpoint: "/api/profiles/:username",
     method: "GET",
     fields: { username: "input" },

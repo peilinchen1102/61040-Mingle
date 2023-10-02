@@ -47,6 +47,14 @@ export default class Responses {
     const username = await User.idsToUsernames([profile.owner]);
     return { ...profile, owner: username[0] };
   }
+
+  /**
+   * Same as {@link profile} but for an array of Profile for improved performance.
+   */
+  static async profiles(profiles: ProfileDoc[]) {
+    const usernames = await User.idsToUsernames(profiles.map((profile) => profile.owner));
+    return profiles.map((profile, i) => ({ ...profile, owner: usernames[i] }));
+  }
 }
 
 Router.registerError(PostAuthorNotMatchError, async (e) => {

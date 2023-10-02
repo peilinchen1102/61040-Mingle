@@ -20,6 +20,12 @@ export default class ProfileConcept {
     return { msg: "Profile successfully created!", profile: await this.profiles.readOne({ _id }) };
   }
 
+  async getProfiles(username?: string) {
+    const filter = username ? { username } : {};
+    const profiles = await this.profiles.readMany(filter);
+    return profiles;
+  }
+
   async getProfile(_id: ObjectId) {
     const profile = await this.profiles.readOne({ owner: _id });
     if (profile == null) {
@@ -32,6 +38,11 @@ export default class ProfileConcept {
     this.sanitizeUpdate(update);
     await this.profiles.updateOne({ owner }, update);
     return { msg: "Profile successfully update!" };
+  }
+
+  async delete(owner: ObjectId) {
+    await this.profiles.deleteOne({ owner });
+    return { msg: "Profile deleted!" };
   }
 
   private sanitizeUpdate(update: Partial<ProfileDoc>) {
