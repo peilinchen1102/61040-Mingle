@@ -26,11 +26,11 @@ class Routes {
   }
 
   @Router.post("/users")
-  async createUser(session: WebSessionDoc, username: string, password: string, major: string, year: string, courses: string) {
+  async createUser(session: WebSessionDoc, username: string, password: string, name: string, major: string, year: string, courses: string) {
     WebSession.isLoggedOut(session);
     const user = await User.create(username, password);
     const userInfo = await User.getUserByUsername(username);
-    await Profile.create(userInfo._id, username, major, year, courses);
+    await Profile.create(userInfo._id, name, major, year, courses);
     return user;
   }
 
@@ -142,15 +142,17 @@ class Routes {
 
   @Router.get("/profiles/:username")
   async getProfile(username: string) {
-    return await Profile.getProfilesByUsername(username);
+    const user = await User.getUserByUsername(username);
+    return Responses.profile(await Profile.getProfile(user._id));
   }
 
   @Router.patch("/profiles/:_id")
-  async updateProfile(session: WebSessionDoc, major: string, year: string, courses: string) {
-    const yearNum = parseInt(year);
-    const listCourses: Array<string> = courses.split(", ");
+  async updateProfile(session: WebSessionDoc, name?: string, major?: string, year?: string, courses?: string) {
     const user = WebSession.getUser(session);
-    return await Profile.update(user, { major, year: yearNum, courses: listCourses });
+    const profile = await Profile.getProfile(user);
+    const yearNum = year ? parseInt(year) : profile.year;
+    const listCourses: Array<string> = courses ? JSON.parse("[" + courses + "]") : profile.courses;
+    return await Profile.update(user, { name: name || profile.name, major: major || profile.major, year: yearNum, courses: listCourses });
   }
 }
 

@@ -1,6 +1,7 @@
 import { User } from "./app";
 import { AlreadyFriendsError, FriendNotFoundError, FriendRequestAlreadyExistsError, FriendRequestDoc, FriendRequestNotFoundError } from "./concepts/friend";
 import { PostAuthorNotMatchError, PostDoc } from "./concepts/post";
+import { ProfileDoc } from "./concepts/profile";
 import { Router } from "./framework/router";
 
 /**
@@ -36,6 +37,15 @@ export default class Responses {
     const to = requests.map((request) => request.to);
     const usernames = await User.idsToUsernames(from.concat(to));
     return requests.map((request, i) => ({ ...request, from: usernames[i], to: usernames[i + requests.length] }));
+  }
+
+  /**
+   * Convert ProfileDoc into more readable format for the frontend
+   * by converting the ids into usernames.
+   */
+  static async profile(profile: ProfileDoc) {
+    const username = await User.idsToUsernames([profile.owner]);
+    return { ...profile, owner: username[0] };
   }
 }
 
