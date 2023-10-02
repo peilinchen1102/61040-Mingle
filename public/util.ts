@@ -21,7 +21,7 @@ const operations: operation[] = [
     name: "Create User",
     endpoint: "/api/users",
     method: "POST",
-    fields: { username: "input", password: "input" },
+    fields: { username: "input", password: "input", major: "input", year: "input", courses: "input" },
   },
   {
     name: "Login",
@@ -76,6 +76,18 @@ const operations: operation[] = [
     endpoint: "/api/posts/:id",
     method: "DELETE",
     fields: { id: "input" },
+  },
+  {
+    name: "Get Profile (empty for all)",
+    endpoint: "/api/profiles/:username",
+    method: "GET",
+    fields: { username: "input" },
+  },
+  {
+    name: "Update Profile",
+    endpoint: "/api/profiles/:id",
+    method: "PATCH",
+    fields: { major: "input", year: "input", courses: "input" },
   },
 ];
 

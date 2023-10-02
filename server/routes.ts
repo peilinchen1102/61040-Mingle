@@ -2,7 +2,7 @@ import { ObjectId } from "mongodb";
 
 import { Router, getExpressRouter } from "./framework/router";
 
-import { Friend, Post, User, WebSession } from "./app";
+import { Friend, Post, Profile, User, WebSession } from "./app";
 import { PostDoc, PostOptions } from "./concepts/post";
 import { UserDoc } from "./concepts/user";
 import { WebSessionDoc } from "./concepts/websession";
@@ -26,9 +26,12 @@ class Routes {
   }
 
   @Router.post("/users")
-  async createUser(session: WebSessionDoc, username: string, password: string) {
+  async createUser(session: WebSessionDoc, username: string, password: string, major: string, year: string, courses: string) {
     WebSession.isLoggedOut(session);
-    return await User.create(username, password);
+    const user = await User.create(username, password);
+    const userInfo = await User.getUserByUsername(username);
+    await Profile.create(userInfo._id, username, major, year, courses);
+    return user;
   }
 
   @Router.patch("/users")
@@ -135,6 +138,19 @@ class Routes {
     const user = WebSession.getUser(session);
     const fromId = (await User.getUserByUsername(from))._id;
     return await Friend.rejectRequest(fromId, user);
+  }
+
+  @Router.get("/profiles/:username")
+  async getProfile(username: string) {
+    return await Profile.getProfilesByUsername(username);
+  }
+
+  @Router.patch("/profiles/:_id")
+  async updateProfile(session: WebSessionDoc, major: string, year: string, courses: string) {
+    const yearNum = parseInt(year);
+    const listCourses: Array<string> = courses.split(", ");
+    const user = WebSession.getUser(session);
+    return await Profile.update(user, { major, year: yearNum, courses: listCourses });
   }
 }
 
