@@ -170,6 +170,13 @@ class Routes {
     const user = WebSession.getUser(session);
     return await Status.update(user, update);
   }
+
+  @Router.get("/statuses/")
+  async getFriendsSameAssignment(session: WebSessionDoc) {
+    const user = WebSession.getUser(session);
+    const friends = await Friend.getFriends(user);
+    return Responses.friends(await Promise.all(friends.filter(async (friend) => await Status.isSameAssignment(user, friend))));
+  }
 }
 
 export default getExpressRouter(new Routes());

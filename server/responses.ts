@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import { User } from "./app";
 import { AlreadyFriendsError, FriendNotFoundError, FriendRequestAlreadyExistsError, FriendRequestDoc, FriendRequestNotFoundError } from "./concepts/friend";
 import { PostAuthorNotMatchError, PostDoc } from "./concepts/post";
@@ -37,6 +38,15 @@ export default class Responses {
     const to = requests.map((request) => request.to);
     const usernames = await User.idsToUsernames(from.concat(to));
     return requests.map((request, i) => ({ ...request, from: usernames[i], to: usernames[i + requests.length] }));
+  }
+
+  /**
+   * Convert FriendDoc into more readable format for the frontend
+   * by converting the ids into usernames.
+   */
+  static async friends(friends: ObjectId[]) {
+    const usernames = await User.idsToUsernames(friends);
+    return usernames;
   }
 
   /**

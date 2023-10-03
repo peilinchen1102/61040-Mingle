@@ -143,6 +143,12 @@ const operations: operation[] = [
     method: "PATCH",
     fields: { update: { userStatus: "input", curAssignment: "input" } },
   },
+  {
+    name: "Friends Working on Same Assignment",
+    endpoint: "/api/statuses/",
+    method: "GET",
+    fields: {},
+  },
 ];
 
 // Do not edit below here.

@@ -20,7 +20,7 @@ export default class StatusConcept {
   async getStatus(_id: ObjectId) {
     const status = await this.statuses.readOne({ owner: _id });
     if (status == null) {
-      throw new NotFoundError(`Sta not found!`);
+      throw new NotFoundError(`Status not found!`);
     }
     return status;
   }
@@ -28,5 +28,15 @@ export default class StatusConcept {
   async update(owner: ObjectId, update: Partial<StatusDoc>) {
     await this.statuses.updateOne({ owner }, update);
     return { msg: "Status succefully updated!" };
+  }
+
+  async isSameAssignment(_id1: ObjectId, _id2: ObjectId) {
+    const user1 = await this.getStatus(_id1);
+    const user2 = await this.getStatus(_id2);
+
+    if (user1.curAssignment == user2.curAssignment) {
+      return true;
+    }
+    return false;
   }
 }

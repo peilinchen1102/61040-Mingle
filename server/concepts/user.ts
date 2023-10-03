@@ -33,7 +33,7 @@ export default class UserConcept {
   async getUserByUsername(username: string) {
     const user = await this.users.readOne({ username });
     if (user === null) {
-      throw new NotFoundError(`User not found!`);
+      throw new NotFoundError(`User not found!${username}`);
     }
     return this.sanitizeUser(user);
   }
