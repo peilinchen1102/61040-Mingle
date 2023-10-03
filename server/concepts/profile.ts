@@ -20,9 +20,8 @@ export default class ProfileConcept {
     return { msg: "Profile successfully created!", profile: await this.profiles.readOne({ _id }) };
   }
 
-  async getProfiles(username?: string) {
-    const filter = username ? { username } : {};
-    const profiles = await this.profiles.readMany(filter);
+  async getProfiles() {
+    const profiles = await this.profiles.readMany({});
     return profiles;
   }
 
@@ -37,7 +36,7 @@ export default class ProfileConcept {
   async update(owner: ObjectId, update: Partial<ProfileDoc>) {
     this.sanitizeUpdate(update);
     await this.profiles.updateOne({ owner }, update);
-    return { msg: "Profile successfully update!" };
+    return { msg: "Profile successfully updated!" };
   }
 
   async delete(owner: ObjectId) {

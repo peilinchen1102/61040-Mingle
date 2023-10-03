@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import { Friend, Post, Profile, Status, User, WebSession } from "./app";
 import { PostDoc, PostOptions } from "./concepts/post";
+import { StatusDoc } from "./concepts/status";
 import { UserDoc } from "./concepts/user";
 import { WebSessionDoc } from "./concepts/websession";
 import { Router, getExpressRouter } from "./framework/router";
@@ -158,10 +159,17 @@ class Routes {
     return await Profile.update(user, update);
   }
 
-  // @Router.patch("/statuses/:_id")
-  // async updateStatus(session: WebSessionDoc, status: string, curAssignment: string) {
-  //   const user = WebSession.getUser(session);
-  // }
+  @Router.get("/statuses/:username")
+  async getStatus(username: string) {
+    const user = await User.getUserByUsername(username);
+    return await Status.getStatus(user._id);
+  }
+
+  @Router.patch("/statuses/:_id")
+  async updateStatus(session: WebSessionDoc, update: Partial<StatusDoc>) {
+    const user = WebSession.getUser(session);
+    return await Status.update(user, update);
+  }
 }
 
 export default getExpressRouter(new Routes());
