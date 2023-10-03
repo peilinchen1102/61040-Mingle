@@ -1,11 +1,9 @@
 import { ObjectId } from "mongodb";
-
-import { Router, getExpressRouter } from "./framework/router";
-
-import { Friend, Post, Profile, User, WebSession } from "./app";
+import { Friend, Post, Profile, Status, User, WebSession } from "./app";
 import { PostDoc, PostOptions } from "./concepts/post";
 import { UserDoc } from "./concepts/user";
 import { WebSessionDoc } from "./concepts/websession";
+import { Router, getExpressRouter } from "./framework/router";
 import Responses from "./responses";
 
 class Routes {
@@ -31,7 +29,8 @@ class Routes {
     const user = await User.create(username, password);
     const userInfo = await User.getUserByUsername(username);
     const profile = await Profile.create(userInfo._id, name, major, year, courses);
-    return { user: user, profile: profile };
+    const status = await Status.create(userInfo._id);
+    return { msg: "User, Profile, Status successfully created!", user: user.user, profile: profile.profile, status: status.status };
   }
 
   @Router.patch("/users")
@@ -155,10 +154,14 @@ class Routes {
   async updateProfile(session: WebSessionDoc, name?: string, major?: string, year?: string, courses?: string) {
     const user = WebSession.getUser(session);
     const profile = await Profile.getProfile(user);
-    const yearNum = year ? parseInt(year) : profile.year;
-    const listCourses: Array<string> = courses ? JSON.parse("[" + courses + "]") : profile.courses;
-    return await Profile.update(user, { name: name || profile.name, major: major || profile.major, year: yearNum, courses: listCourses });
+    const update = await Profile.parseUpdate(profile, name, major, year, courses);
+    return await Profile.update(user, update);
   }
+
+  // @Router.patch("/statuses/:_id")
+  // async updateStatus(session: WebSessionDoc, status: string, curAssignment: string) {
+  //   const user = WebSession.getUser(session);
+  // }
 }
 
 export default getExpressRouter(new Routes());

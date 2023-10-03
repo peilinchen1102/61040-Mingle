@@ -45,6 +45,12 @@ export default class ProfileConcept {
     return { msg: "Profile deleted!" };
   }
 
+  async parseUpdate(profile: ProfileDoc, name?: string, major?: string, year?: string, courses?: string) {
+    const yearNum = year ? parseInt(year) : profile.year;
+    const listCourses: Array<string> = courses ? JSON.parse("[" + courses + "]") : profile.courses;
+    return { name: name || profile.name, major: major || profile.major, year: yearNum, courses: listCourses };
+  }
+
   private sanitizeUpdate(update: Partial<ProfileDoc>) {
     const allowedUpdates = ["name", "major", "year", "courses"];
     for (const key in update) {
