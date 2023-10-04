@@ -184,6 +184,48 @@ class Routes {
       ).then((res) => friends.filter((friend, index) => res[index])),
     );
   }
+
+  @Router.get("/messages/:from")
+  async receiveMessages(session: WebSessionDoc, from: string) {}
+
+  @Router.post("/messages/:to")
+  async sendMessage(session: WebSessionDoc, to: string) {}
+
+  @Router.get("/groups")
+  async getGroups(session: WebSessionDoc) {}
+
+  @Router.post("/groups")
+  async createGroup(session: WebSessionDoc, name: string) {}
+
+  @Router.delete("/groups/:group")
+  async leaveGroup(session: WebSessionDoc, group: string) {}
+
+  @Router.post("/group/requests/:to")
+  async sendGroupRequest(session: WebSessionDoc, to: string) {}
+
+  @Router.put("group/accept/:from")
+  async acceptGroupRequest(session: WebSessionDoc, from: string) {}
+
+  @Router.put("group/reject/:from")
+  async rejectGroupRequest(session: WebSessionDoc, from: string) {}
+
+  @Router.get("/tasks")
+  async getTasks(session: WebSessionDoc) {}
+
+  @Router.post("/tasks/add/:group")
+  async addTask(session: WebSessionDoc, group?: string) {}
+
+  @Router.put("/tasks/complete/:group")
+  async completeTask(session: WebSessionDoc, group?: string) {}
+
+  @Router.get("/tasks/group/:group")
+  async getGroupTasks(session: WebSessionDoc, group?: string) {}
+
+  @Router.get("/matches")
+  async getMatches(session: WebSessionDoc) {}
+
+  @Router.post("/matches/find")
+  async requestMatch(session: WebSessionDoc, preferences: string) {}
 }
 
 export default getExpressRouter(new Routes());
