@@ -159,23 +159,30 @@ class Routes {
     return await Profile.update(user, update);
   }
 
-  @Router.get("/statuses/:username")
+  @Router.get("/status/:username")
   async getStatus(username: string) {
     const user = await User.getUserByUsername(username);
     return await Status.getStatus(user._id);
   }
 
-  @Router.patch("/statuses/:_id")
+  @Router.patch("/status/:_id")
   async updateStatus(session: WebSessionDoc, update: Partial<StatusDoc>) {
     const user = WebSession.getUser(session);
     return await Status.update(user, update);
   }
 
-  @Router.get("/statuses/")
+  @Router.get("/statuses")
   async getFriendsSameAssignment(session: WebSessionDoc) {
     const user = WebSession.getUser(session);
     const friends = await Friend.getFriends(user);
-    return Responses.friends(await Promise.all(friends.filter(async (friend) => await Status.isSameAssignment(user, friend))));
+
+    return Responses.friends(
+      await Promise.all(
+        friends.map(async (friend: ObjectId) => {
+          return Status.isSameAssignment(user, friend);
+        }),
+      ).then((res) => friends.filter((friend, index) => res[index])),
+    );
   }
 }
 

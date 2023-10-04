@@ -133,19 +133,19 @@ const operations: operation[] = [
   },
   {
     name: "Get Status",
-    endpoint: "/api/statuses/:username",
+    endpoint: "/api/status/:username",
     method: "GET",
     fields: { username: "input" },
   },
   {
     name: "Update Status",
-    endpoint: "/api/statuses/:id",
+    endpoint: "/api/status/:id",
     method: "PATCH",
     fields: { update: { userStatus: "input", curAssignment: "input" } },
   },
   {
     name: "Get Friends Working on Same Assignment",
-    endpoint: "/api/statuses/",
+    endpoint: "/api/statuses",
     method: "GET",
     fields: {},
   },
