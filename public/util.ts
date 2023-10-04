@@ -144,7 +144,7 @@ const operations: operation[] = [
     fields: { update: { userStatus: "input", curAssignment: "input" } },
   },
   {
-    name: "Friends Working on Same Assignment",
+    name: "Get Friends Working on Same Assignment",
     endpoint: "/api/statuses/",
     method: "GET",
     fields: {},
