@@ -23,7 +23,15 @@ export default class MessageConcept {
   }
 
   async getMessagesBetween(user1: ObjectId, user2: ObjectId) {
-    return await this.messages.readMany({ from: user1, to: user2 }, { sort: { dateCreated: -1 } });
+    return await this.messages.readMany(
+      {
+        $or: [
+          { from: user1, to: user2 },
+          { from: user2, to: user1 },
+        ],
+      },
+      { sort: { dateCreated: -1 } },
+    );
   }
 
   async sendMessage(from: ObjectId, to: ObjectId, content: string) {

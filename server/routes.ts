@@ -26,13 +26,19 @@ class Routes {
   }
 
   @Router.post("/users")
-  async createUser(session: WebSessionDoc, username: string, password: string, name: string, major: string, year: number, courses: Array<string>) {
+  async createUser(session: WebSessionDoc, username: string, password: string, name: string, major: string, year: string, courses: Array<string>) {
     WebSession.isLoggedOut(session);
     const user = await User.create(username, password);
     const userInfo = await User.getUserByUsername(username);
-    const profile = await Profile.create(userInfo._id, name, major, year, courses);
-    const status = await Status.create(userInfo._id);
-    return { msg: "User, Profile, Status successfully created!", user: user.user, profile: profile.profile, status: status.status };
+    console.log("2", courses);
+    try {
+      const profile = await Profile.create(userInfo._id, name, major, year, courses);
+      const status = await Status.create(userInfo._id);
+      return { msg: "User, Profile, Status successfully created!", user: user.user, profile: profile.profile, status: status.status };
+    } catch (e) {
+      await User.delete(userInfo._id);
+      return { msg: "Account cannot be created!", error: e || "Incorrect course names, make sure to input an array of strings" };
+    }
   }
 
   @Router.patch("/users")
@@ -193,15 +199,15 @@ class Routes {
   @Router.get("/messages/:username")
   async getMessagesBetween(session: WebSessionDoc, username: string) {
     const u1 = WebSession.getUser(session);
-    const u2 = await User.getUserByUsername(username);
-    return Responses.messages(await Message.getMessagesBetween(u1, u2._id));
+    const u2 = (await User.getUserByUsername(username))._id;
+    return Responses.messages(await Message.getMessagesBetween(u1, u2));
   }
 
   @Router.post("/messages/:to")
   async sendMessage(session: WebSessionDoc, to: string, content: string) {
     const u1 = WebSession.getUser(session);
-    const u2 = await User.getUserByUsername(to);
-    return await Message.sendMessage(u1, u2._id, content);
+    const u2 = (await User.getUserByUsername(to))._id;
+    return await Message.sendMessage(u1, u2, content);
   }
 
   // @Router.get("/groups")

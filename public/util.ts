@@ -21,7 +21,7 @@ const operations: operation[] = [
     name: "Create User",
     endpoint: "/api/users",
     method: "POST",
-    fields: { username: "input", password: "input", info: { name: "input", major: "input", year: "input", courses: "json" } },
+    fields: { username: "input", password: "input", name: "input", major: "input", year: "input", courses: "json" },
   },
   {
     name: "Login",
