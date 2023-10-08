@@ -14,7 +14,7 @@ export default class GroupConcept {
 
   async create(name: string, owner: ObjectId, members: Array<ObjectId>) {
     await this.isGroupNameUnique(name);
-    if (!members.includes(owner)) {
+    if (!members.map((member) => member.toString()).includes(owner.toString())) {
       throw new OwnerMustBeAMemberError();
     }
     await this.groups.createOne({ name, owner, members, messages: [] });
@@ -22,7 +22,7 @@ export default class GroupConcept {
   }
 
   async getGroups(user: ObjectId) {
-    const groups = await this.groups.readMany({ $match: { members: user } });
+    const groups = await this.groups.readMany({ members: user });
     return groups;
   }
 
@@ -37,15 +37,20 @@ export default class GroupConcept {
   async join(user: ObjectId, name: string) {
     const group = await this.getGroupByName(name);
     await this.canUserJoinGroup(user, group._id);
-    group.members.push(user);
+    const members = group.members;
+    members.push(user);
+    await this.groups.replaceOne({ _id: group._id }, { ...group, members: members });
     return { msg: "Joined group successfully!" };
   }
 
   async leave(user: ObjectId, name: string) {
     const group = await this.getGroupByName(name);
     await this.canUserLeaveGroup(user, group._id);
-    const idx = group.members.indexOf(user);
-    group.members.splice(idx);
+    const members = group.members;
+    const idx = members.indexOf(user);
+    members.splice(idx);
+
+    await this.groups.replaceOne({ _id: group._id }, { ...group, members: members });
     return { msg: "Left group successfully!" };
   }
 
@@ -60,39 +65,42 @@ export default class GroupConcept {
     const group = await this.getGroupByName(name);
     await this.isGroupOwner(user, group._id);
     await this.canUserLeaveGroup(member, group._id);
-    const idx = group.members.indexOf(member);
-    group.members.splice(idx);
+    const members = group.members;
+    const idx = members.indexOf(member);
+    members.splice(idx);
+
+    await this.groups.replaceOne({ _id: group._id }, { ...group, members: members });
     return { msg: "Member successfully removed!" };
   }
 
   async isGroupOwner(user: ObjectId, group: ObjectId) {
-    const maybeGroup = await this.groups.readOne({ owner: user });
+    const maybeGroup = await this.groups.readOne({ _id: group });
 
-    if (maybeGroup?._id.toString() !== group.toString()) {
+    if (maybeGroup?.owner.toString() !== user.toString()) {
       throw new UnauthenticatedError("User {0} is not the owner of group {1}", user, group);
     }
   }
 
   private async canUserJoinGroup(user: ObjectId, group: ObjectId) {
-    const maybeGroup = await this.groups.readOne({ group, $match: { members: user } });
+    const maybeGroup = await this.groups.readOne({ _id: group, members: user });
     if (maybeGroup !== null) {
-      throw new UserAlreadyInGroupError(user, group);
+      throw new UserAlreadyInGroupError();
     }
   }
 
   private async canUserLeaveGroup(user: ObjectId, group: ObjectId) {
-    const maybeGroup = await this.groups.readOne({ group, $match: { members: user } });
+    const maybeGroup = await this.groups.readOne({ _id: group, members: user });
     if (maybeGroup === null) {
-      throw new NotFoundError(`User {0} not found in group {1}`, user, group);
+      throw new NotFoundError(`User not found in group`);
     }
 
     if (maybeGroup.owner.toString() === user.toString()) {
-      throw new OwnerCannotLeaveGroupError(user, group);
+      throw new OwnerCannotLeaveGroupError();
     }
   }
 
   async groupExist(_id: ObjectId) {
-    const maybeGroup = await this.groups.readOne({ _id });
+    const maybeGroup = await this.groups.readOne({ _id: _id });
     if (maybeGroup === null) {
       throw new NotFoundError(`Group not found!`);
     }
@@ -106,20 +114,14 @@ export default class GroupConcept {
 }
 
 export class UserAlreadyInGroupError extends NotAllowedError {
-  constructor(
-    public readonly user: ObjectId,
-    public readonly group: ObjectId,
-  ) {
-    super("User {0} already in group {1}", user, group);
+  constructor() {
+    super("You are already in the group!");
   }
 }
 
 export class OwnerCannotLeaveGroupError extends NotAllowedError {
-  constructor(
-    public readonly owner: ObjectId,
-    public readonly group: ObjectId,
-  ) {
-    super("Owner {0} cannot leave group {1}", owner, group);
+  constructor() {
+    super("You are the owner and cannot leave the group!");
   }
 }
 export class OwnerMustBeAMemberError extends NotAllowedError {

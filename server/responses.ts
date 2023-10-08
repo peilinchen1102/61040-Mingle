@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import { User } from "./app";
 import { AlreadyFriendsError, FriendNotFoundError, FriendRequestAlreadyExistsError, FriendRequestDoc, FriendRequestNotFoundError } from "./concepts/friend";
+import { GroupDoc } from "./concepts/group";
 import { MessageDoc } from "./concepts/message";
 import { PostAuthorNotMatchError, PostDoc } from "./concepts/post";
 import { ProfileDoc } from "./concepts/profile";
@@ -67,6 +68,18 @@ export default class Responses {
     return profiles.map((profile, i) => ({ ...profile, owner: usernames[i] }));
   }
 
+  /**
+   * Convert GroupDoc into more readable format for the frontend
+   * by converting the ids into usernames.
+   */
+  static async groups(groups: GroupDoc[]) {
+    if (!groups) {
+      return groups;
+    }
+    const usernames = await User.idsToUsernames(groups.map((group) => group.owner));
+    const members = await Promise.all(groups.map(async (group) => await User.idsToUsernames(group.members)));
+    return groups.map((group, i) => ({ ...group, owner: usernames[i], members: members[i] }));
+  }
   /**
    * Convert MessageDoc into more readable format for the frontend
    * by converting the ids into usernames.

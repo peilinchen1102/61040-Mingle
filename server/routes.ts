@@ -213,7 +213,8 @@ class Routes {
   @Router.get("/groups")
   async getGroups(session: WebSessionDoc) {
     const user = WebSession.getUser(session);
-    return await Group.getGroups(user);
+    console.log(await Group.getGroups(user));
+    return Responses.groups(await Group.getGroups(user));
   }
 
   @Router.post("/groups")
@@ -223,23 +224,29 @@ class Routes {
     return Group.create(name, user, membersId);
   }
 
-  @Router.patch("/groups/:groupName")
+  @Router.patch("/group/join/:groupName")
   async joinGroup(session: WebSessionDoc, groupName: string) {
     const user = WebSession.getUser(session);
     return await Group.join(user, groupName);
   }
 
-  @Router.patch("/groups/:groupName")
+  @Router.patch("/group/leave/:groupName")
   async leaveGroup(session: WebSessionDoc, groupName: string) {
     const user = WebSession.getUser(session);
     return await Group.leave(user, groupName);
   }
 
-  @Router.patch("/groups/:groupName")
-  async removeMember(session: WebSessionDoc, groupName: string, memberUsername: string) {
+  @Router.patch("/group/remove/:groupName")
+  async removeGroupMember(session: WebSessionDoc, groupName: string, memberUsername: string) {
     const user = WebSession.getUser(session);
     const member = await User.getUserByUsername(memberUsername);
     return await Group.removeMember(user, groupName, member._id);
+  }
+
+  @Router.delete("/group/delete/:groupName")
+  async deleteGroup(session: WebSessionDoc, groupName: string) {
+    const user = WebSession.getUser(session);
+    return await Group.delete(user, groupName);
   }
 
   // @Router.get("/tasks")

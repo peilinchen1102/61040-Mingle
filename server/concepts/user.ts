@@ -39,6 +39,9 @@ export default class UserConcept {
   }
 
   async idsToUsernames(ids: ObjectId[]) {
+    if (!ids) {
+      return [];
+    }
     const users = await this.users.readMany({ _id: { $in: ids } });
 
     // Store strings in Map because ObjectId comparison by reference is wrong

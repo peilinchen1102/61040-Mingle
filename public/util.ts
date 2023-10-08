@@ -174,12 +174,6 @@ const operations: operation[] = [
     fields: {},
   },
   {
-    name: "Get Groups",
-    endpoint: "/api/groups",
-    method: "GET",
-    fields: {},
-  },
-  {
     name: "Create Group",
     endpoint: "/api/groups",
     method: "POST",
@@ -187,21 +181,27 @@ const operations: operation[] = [
   },
   {
     name: "Join Groups",
-    endpoint: "/api/groups/:groupName",
+    endpoint: "/api/group/join/:groupName",
     method: "PATCH",
     fields: { groupName: "input" },
   },
   {
     name: "Leave Group",
-    endpoint: "/api/groups/:groupName",
+    endpoint: "/api/group/leave/:groupName",
     method: "PATCH",
     fields: { groupName: "input" },
   },
   {
     name: "Remove Member From Group",
-    endpoint: "/api/groups/:groupName",
+    endpoint: "/api/group/remove/:groupName",
     method: "PATCH",
     fields: { groupName: "input", memberUsername: "input" },
+  },
+  {
+    name: "Delete Group",
+    endpoint: "/api/group/delete/:groupName",
+    method: "DELETE",
+    fields: { groupName: "input" },
   },
 ];
 
