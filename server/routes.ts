@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { Friend, Message, Post, Profile, Status, User, WebSession } from "./app";
+import { Friend, Group, Message, Post, Profile, Status, User, WebSession } from "./app";
 import { PostDoc, PostOptions } from "./concepts/post";
 import { ProfileDoc } from "./concepts/profile";
 import { StatusDoc } from "./concepts/status";
@@ -30,7 +30,7 @@ class Routes {
     WebSession.isLoggedOut(session);
     const user = await User.create(username, password);
     const userInfo = await User.getUserByUsername(username);
-    console.log("2", courses);
+
     try {
       const profile = await Profile.create(userInfo._id, name, major, year, courses);
       const status = await Status.create(userInfo._id);
@@ -51,7 +51,7 @@ class Routes {
   async deleteUser(session: WebSessionDoc) {
     const user = WebSession.getUser(session);
     WebSession.end(session);
-    return { user: await User.delete(user), profile: await Profile.delete(user) };
+    return { user: await User.delete(user), profile: await Profile.delete(user), status: await Status.delete(user) };
   }
 
   @Router.post("/login")
@@ -210,23 +210,37 @@ class Routes {
     return await Message.sendMessage(u1, u2, content);
   }
 
-  // @Router.get("/groups")
-  // async getGroups(session: WebSessionDoc) {}
+  @Router.get("/groups")
+  async getGroups(session: WebSessionDoc) {
+    const user = WebSession.getUser(session);
+    return await Group.getGroups(user);
+  }
 
-  // @Router.post("/groups")
-  // async createGroup(session: WebSessionDoc, name: string) {}
+  @Router.post("/groups")
+  async createGroup(session: WebSessionDoc, name: string, members: Array<string>) {
+    const user = WebSession.getUser(session);
+    const membersId = await Promise.all(members.map(async (member) => (await User.getUserByUsername(member))._id));
+    return Group.create(name, user, membersId);
+  }
 
-  // @Router.delete("/groups/:group")
-  // async leaveGroup(session: WebSessionDoc, group: string) {}
+  @Router.patch("/groups/:groupName")
+  async joinGroup(session: WebSessionDoc, groupName: string) {
+    const user = WebSession.getUser(session);
+    return await Group.join(user, groupName);
+  }
 
-  // @Router.post("/group/requests/:to")
-  // async sendGroupRequest(session: WebSessionDoc, to: string) {}
+  @Router.patch("/groups/:groupName")
+  async leaveGroup(session: WebSessionDoc, groupName: string) {
+    const user = WebSession.getUser(session);
+    return await Group.leave(user, groupName);
+  }
 
-  // @Router.put("group/accept/:from")
-  // async acceptGroupRequest(session: WebSessionDoc, from: string) {}
-
-  // @Router.put("group/reject/:from")
-  // async rejectGroupRequest(session: WebSessionDoc, from: string) {}
+  @Router.patch("/groups/:groupName")
+  async removeMember(session: WebSessionDoc, groupName: string, memberUsername: string) {
+    const user = WebSession.getUser(session);
+    const member = await User.getUserByUsername(memberUsername);
+    return await Group.removeMember(user, groupName, member._id);
+  }
 
   // @Router.get("/tasks")
   // async getTasks(session: WebSessionDoc) {}

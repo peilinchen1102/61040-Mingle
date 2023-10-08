@@ -1,4 +1,5 @@
 import FriendConcept from "./concepts/friend";
+import GroupConcept from "./concepts/group";
 import MessageConcept from "./concepts/message";
 import PostConcept from "./concepts/post";
 import ProfileConcept from "./concepts/profile";
@@ -14,3 +15,4 @@ export const Friend = new FriendConcept();
 export const Profile = new ProfileConcept();
 export const Status = new StatusConcept();
 export const Message = new MessageConcept();
+export const Group = new GroupConcept();

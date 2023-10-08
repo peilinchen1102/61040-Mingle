@@ -27,7 +27,12 @@ export default class StatusConcept {
 
   async update(owner: ObjectId, update: Partial<StatusDoc>) {
     await this.statuses.updateOne({ owner }, update);
-    return { msg: "Status succefully updated!" };
+    return { msg: "Status successfully updated!" };
+  }
+
+  async delete(owner: ObjectId) {
+    await this.statuses.deleteOne({ owner });
+    return { msg: "Status successfully deleted!" };
   }
 
   async isSameAssignment(_id1: ObjectId, _id2: ObjectId) {

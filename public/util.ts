@@ -167,6 +167,42 @@ const operations: operation[] = [
     method: "POST",
     fields: { to: "input", content: "input" },
   },
+  {
+    name: "Get Groups",
+    endpoint: "/api/groups",
+    method: "GET",
+    fields: {},
+  },
+  {
+    name: "Get Groups",
+    endpoint: "/api/groups",
+    method: "GET",
+    fields: {},
+  },
+  {
+    name: "Create Group",
+    endpoint: "/api/groups",
+    method: "POST",
+    fields: { name: "input", members: "json" },
+  },
+  {
+    name: "Join Groups",
+    endpoint: "/api/groups/:groupName",
+    method: "PATCH",
+    fields: { groupName: "input" },
+  },
+  {
+    name: "Leave Group",
+    endpoint: "/api/groups/:groupName",
+    method: "PATCH",
+    fields: { groupName: "input" },
+  },
+  {
+    name: "Remove Member From Group",
+    endpoint: "/api/groups/:groupName",
+    method: "PATCH",
+    fields: { groupName: "input", memberUsername: "input" },
+  },
 ];
 
 // Do not edit below here.
@@ -268,7 +304,9 @@ async function submitEventHandler(e: Event) {
 
   const op = operations.find((op) => op.endpoint === endpoint && op.method === $method);
   for (const [key, val] of Object.entries(reqData)) {
-    if (op?.fields[key] === "json") {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const type = key.split(".").reduce((obj, key) => obj[key], op?.fields as any);
+    if (type === "json") {
       reqData[key] = JSON.parse(val as string);
     }
   }

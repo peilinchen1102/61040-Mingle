@@ -53,7 +53,6 @@ export default class ProfileConcept {
   }
 
   private async canCreate(name: string, major: string, year: string, courses: Array<string>) {
-    console.log(courses);
     if (!name || !major || !year || !courses) {
       throw new BadValuesError("Name, major, year, courses must be nonempty!");
     }
