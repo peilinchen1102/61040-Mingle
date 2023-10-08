@@ -14,6 +14,9 @@ export default class GroupConcept {
 
   async create(name: string, owner: ObjectId, members: Array<ObjectId>) {
     await this.isGroupNameUnique(name);
+    if (!members.includes(owner)) {
+      throw new OwnerMustBeAMemberError();
+    }
     await this.groups.createOne({ name, owner, members, messages: [] });
     return { msg: "Group successfully created!" };
   }
@@ -117,5 +120,10 @@ export class OwnerCannotLeaveGroupError extends NotAllowedError {
     public readonly group: ObjectId,
   ) {
     super("Owner {0} cannot leave group {1}", owner, group);
+  }
+}
+export class OwnerMustBeAMemberError extends NotAllowedError {
+  constructor() {
+    super("Owner must be a member of the group");
   }
 }
