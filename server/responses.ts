@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import { User } from "./app";
 import { AlreadyFriendsError, FriendNotFoundError, FriendRequestAlreadyExistsError, FriendRequestDoc, FriendRequestNotFoundError } from "./concepts/friend";
+import { MessageDoc } from "./concepts/message";
 import { PostAuthorNotMatchError, PostDoc } from "./concepts/post";
 import { ProfileDoc } from "./concepts/profile";
 import { Router } from "./framework/router";
@@ -64,6 +65,17 @@ export default class Responses {
   static async profiles(profiles: ProfileDoc[]) {
     const usernames = await User.idsToUsernames(profiles.map((profile) => profile.owner));
     return profiles.map((profile, i) => ({ ...profile, owner: usernames[i] }));
+  }
+
+  /**
+   * Convert MessageDoc into more readable format for the frontend
+   * by converting the ids into usernames.
+   */
+  static async messages(messages: MessageDoc[]) {
+    const from = messages.map((msg) => msg.from);
+    const to = messages.map((msg) => msg.to);
+    const usernames = await User.idsToUsernames(from.concat(to));
+    return messages.map((msg, i) => ({ ...msg, from: usernames[i], to: usernames[i + messages.length] }));
   }
 }
 

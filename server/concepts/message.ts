@@ -41,6 +41,6 @@ export default class MessageConcept {
 
 export class CannotMessageSelfError extends NotAllowedError {
   constructor(public readonly user: ObjectId) {
-    super("Message from {{0} to itself is not allowed!");
+    super("Message cannot be sent to yourself!");
   }
 }

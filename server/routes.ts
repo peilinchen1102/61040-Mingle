@@ -188,14 +188,14 @@ class Routes {
   @Router.get("/messages")
   async getMessages(session: WebSessionDoc) {
     const user = WebSession.getUser(session);
-    return await Message.getMessages(user);
+    return Responses.messages(await Message.getMessages(user));
   }
 
   @Router.get("/messages/:username")
   async getMessagesBetween(session: WebSessionDoc, username: string) {
     const u1 = WebSession.getUser(session);
     const u2 = await User.getUserByUsername(username);
-    return await Message.getMessagesBetween(u1, u2._id);
+    return Responses.messages(await Message.getMessagesBetween(u1, u2._id));
   }
 
   @Router.post("/messages/:to")
