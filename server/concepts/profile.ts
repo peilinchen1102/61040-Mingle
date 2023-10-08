@@ -6,18 +6,16 @@ export interface ProfileDoc extends BaseDoc {
   owner: ObjectId;
   name: string;
   major: string;
-  year: number;
+  year: string;
   courses: Array<string>;
 }
 
 export default class ProfileConcept {
   public readonly profiles = new DocCollection<ProfileDoc>("profiles");
 
-  async create(owner: ObjectId, name: string, major: string, year: string, courses: string) {
+  async create(owner: ObjectId, name: string, major: string, year: string, courses: Array<string>) {
     await this.canCreate(name, major, year, courses);
-    const yearNum = parseInt(year);
-    const listCourses: Array<string> = JSON.parse("[" + courses + "]");
-    const _id = await this.profiles.createOne({ owner, name, major, year: yearNum, courses: listCourses });
+    const _id = await this.profiles.createOne({ owner, name, major, year, courses });
     return { msg: "Profile successfully created!", profile: await this.profiles.readOne({ _id }) };
   }
 
@@ -45,12 +43,6 @@ export default class ProfileConcept {
     return { msg: "Profile deleted!" };
   }
 
-  async parseUpdate(profile: ProfileDoc, name?: string, major?: string, year?: string, courses?: string) {
-    const yearNum = year ? parseInt(year) : profile.year;
-    const listCourses: Array<string> = courses ? JSON.parse("[" + courses + "]") : profile.courses;
-    return { name: name || profile.name, major: major || profile.major, year: yearNum, courses: listCourses };
-  }
-
   private sanitizeUpdate(update: Partial<ProfileDoc>) {
     const allowedUpdates = ["name", "major", "year", "courses"];
     for (const key in update) {
@@ -60,7 +52,7 @@ export default class ProfileConcept {
     }
   }
 
-  private async canCreate(name: string, major: string, year: string, courses: string) {
+  private async canCreate(name: string, major: string, year: string, courses: Array<string>) {
     if (!name || !major || !year || !courses) {
       throw new BadValuesError("Name, major, year, courses must be nonempty!");
     }

@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import { Friend, Message, Post, Profile, Status, User, WebSession } from "./app";
 import { PostDoc, PostOptions } from "./concepts/post";
+import { ProfileDoc } from "./concepts/profile";
 import { StatusDoc } from "./concepts/status";
 import { UserDoc } from "./concepts/user";
 import { WebSessionDoc } from "./concepts/websession";
@@ -25,7 +26,7 @@ class Routes {
   }
 
   @Router.post("/users")
-  async createUser(session: WebSessionDoc, username: string, password: string, name: string, major: string, year: string, courses: string) {
+  async createUser(session: WebSessionDoc, username: string, password: string, name: string, major: string, year: number, courses: Array<string>) {
     WebSession.isLoggedOut(session);
     const user = await User.create(username, password);
     const userInfo = await User.getUserByUsername(username);
@@ -152,10 +153,8 @@ class Routes {
   }
 
   @Router.patch("/profile")
-  async updateProfile(session: WebSessionDoc, name?: string, major?: string, year?: string, courses?: string) {
+  async updateProfile(session: WebSessionDoc, update: Partial<ProfileDoc>) {
     const user = WebSession.getUser(session);
-    const profile = await Profile.getProfile(user);
-    const update = await Profile.parseUpdate(profile, name, major, year, courses);
     return await Profile.update(user, update);
   }
 
