@@ -127,7 +127,7 @@ const operations: operation[] = [
   },
   {
     name: "Update Profile",
-    endpoint: "/api/profiles/:id",
+    endpoint: "/api/profile",
     method: "PATCH",
     fields: { name: "input", major: "input", year: "input", courses: "input" },
   },
@@ -139,7 +139,7 @@ const operations: operation[] = [
   },
   {
     name: "Update Status",
-    endpoint: "/api/status/:id",
+    endpoint: "/api/status",
     method: "PATCH",
     fields: { update: { userStatus: "input", curAssignment: "input" } },
   },
@@ -148,6 +148,24 @@ const operations: operation[] = [
     endpoint: "/api/statuses",
     method: "GET",
     fields: {},
+  },
+  {
+    name: "Get Messages",
+    endpoint: "/api/messages",
+    method: "GET",
+    fields: {},
+  },
+  {
+    name: "Get Conversation With",
+    endpoint: "/api/messages/:username",
+    method: "GET",
+    fields: { username: "input" },
+  },
+  {
+    name: "Send Message To",
+    endpoint: "/api/messages/:to",
+    method: "POST",
+    fields: { to: "input", content: "input" },
   },
 ];
 

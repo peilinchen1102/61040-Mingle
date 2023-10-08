@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { Friend, Post, Profile, Status, User, WebSession } from "./app";
+import { Friend, Message, Post, Profile, Status, User, WebSession } from "./app";
 import { PostDoc, PostOptions } from "./concepts/post";
 import { StatusDoc } from "./concepts/status";
 import { UserDoc } from "./concepts/user";
@@ -151,7 +151,7 @@ class Routes {
     return Responses.profile(await Profile.getProfile(user._id));
   }
 
-  @Router.patch("/profiles/:_id")
+  @Router.patch("/profile")
   async updateProfile(session: WebSessionDoc, name?: string, major?: string, year?: string, courses?: string) {
     const user = WebSession.getUser(session);
     const profile = await Profile.getProfile(user);
@@ -165,7 +165,7 @@ class Routes {
     return await Status.getStatus(user._id);
   }
 
-  @Router.patch("/status/:_id")
+  @Router.patch("/status")
   async updateStatus(session: WebSessionDoc, update: Partial<StatusDoc>) {
     const user = WebSession.getUser(session);
     return await Status.update(user, update);
@@ -185,47 +185,61 @@ class Routes {
     );
   }
 
-  @Router.get("/messages/:from")
-  async receiveMessages(session: WebSessionDoc, from: string) {}
+  @Router.get("/messages")
+  async getMessages(session: WebSessionDoc) {
+    const user = WebSession.getUser(session);
+    return await Message.getMessages(user);
+  }
+
+  @Router.get("/messages/:username")
+  async getMessagesBetween(session: WebSessionDoc, username: string) {
+    const u1 = WebSession.getUser(session);
+    const u2 = await User.getUserByUsername(username);
+    return await Message.getMessagesBetween(u1, u2._id);
+  }
 
   @Router.post("/messages/:to")
-  async sendMessage(session: WebSessionDoc, to: string) {}
+  async sendMessage(session: WebSessionDoc, to: string, content: string) {
+    const u1 = WebSession.getUser(session);
+    const u2 = await User.getUserByUsername(to);
+    return await Message.sendMessage(u1, u2._id, content);
+  }
 
-  @Router.get("/groups")
-  async getGroups(session: WebSessionDoc) {}
+  // @Router.get("/groups")
+  // async getGroups(session: WebSessionDoc) {}
 
-  @Router.post("/groups")
-  async createGroup(session: WebSessionDoc, name: string) {}
+  // @Router.post("/groups")
+  // async createGroup(session: WebSessionDoc, name: string) {}
 
-  @Router.delete("/groups/:group")
-  async leaveGroup(session: WebSessionDoc, group: string) {}
+  // @Router.delete("/groups/:group")
+  // async leaveGroup(session: WebSessionDoc, group: string) {}
 
-  @Router.post("/group/requests/:to")
-  async sendGroupRequest(session: WebSessionDoc, to: string) {}
+  // @Router.post("/group/requests/:to")
+  // async sendGroupRequest(session: WebSessionDoc, to: string) {}
 
-  @Router.put("group/accept/:from")
-  async acceptGroupRequest(session: WebSessionDoc, from: string) {}
+  // @Router.put("group/accept/:from")
+  // async acceptGroupRequest(session: WebSessionDoc, from: string) {}
 
-  @Router.put("group/reject/:from")
-  async rejectGroupRequest(session: WebSessionDoc, from: string) {}
+  // @Router.put("group/reject/:from")
+  // async rejectGroupRequest(session: WebSessionDoc, from: string) {}
 
-  @Router.get("/tasks")
-  async getTasks(session: WebSessionDoc) {}
+  // @Router.get("/tasks")
+  // async getTasks(session: WebSessionDoc) {}
 
-  @Router.post("/tasks/add/:group")
-  async addTask(session: WebSessionDoc, group?: string) {}
+  // @Router.post("/tasks/add/:group")
+  // async addTask(session: WebSessionDoc, group?: string) {}
 
-  @Router.put("/tasks/complete/:group")
-  async completeTask(session: WebSessionDoc, group?: string) {}
+  // @Router.put("/tasks/complete/:group")
+  // async completeTask(session: WebSessionDoc, group?: string) {}
 
-  @Router.get("/tasks/group/:group")
-  async getGroupTasks(session: WebSessionDoc, group?: string) {}
+  // @Router.get("/tasks/group/:group")
+  // async getGroupTasks(session: WebSessionDoc, group?: string) {}
 
-  @Router.get("/matches")
-  async getMatches(session: WebSessionDoc) {}
+  // @Router.get("/matches")
+  // async getMatches(session: WebSessionDoc) {}
 
-  @Router.post("/matches/find")
-  async requestMatch(session: WebSessionDoc, preferences: string) {}
+  // @Router.post("/matches/find")
+  // async requestMatch(session: WebSessionDoc, preferences: string) {}
 }
 
 export default getExpressRouter(new Routes());

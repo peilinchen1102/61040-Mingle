@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import DocCollection, { BaseDoc } from "../framework/doc";
-import { NotAllowedError, NotFoundError } from "./errors";
+import { BadValuesError, NotAllowedError, NotFoundError } from "./errors";
 
 export interface ProfileDoc extends BaseDoc {
   owner: ObjectId;
@@ -14,6 +14,7 @@ export default class ProfileConcept {
   public readonly profiles = new DocCollection<ProfileDoc>("profiles");
 
   async create(owner: ObjectId, name: string, major: string, year: string, courses: string) {
+    await this.canCreate(name, major, year, courses);
     const yearNum = parseInt(year);
     const listCourses: Array<string> = JSON.parse("[" + courses + "]");
     const _id = await this.profiles.createOne({ owner, name, major, year: yearNum, courses: listCourses });
@@ -56,6 +57,12 @@ export default class ProfileConcept {
       if (!allowedUpdates.includes(key)) {
         throw new NotAllowedError(`Cannot update '${key}' field!`);
       }
+    }
+  }
+
+  private async canCreate(name: string, major: string, year: string, courses: string) {
+    if (!name || !major || !year || !courses) {
+      throw new BadValuesError("Name, major, year, courses must be nonempty!");
     }
   }
 }

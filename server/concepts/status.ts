@@ -4,7 +4,7 @@ import { NotFoundError } from "./errors";
 
 export interface StatusDoc extends BaseDoc {
   owner: ObjectId;
-  userStatus: string;
+  userStatus: "active" | "away" | "busy";
   curAssignment: string;
 }
 
