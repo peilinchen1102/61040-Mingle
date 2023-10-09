@@ -249,6 +249,22 @@ class Routes {
     return await Group.delete(user, groupName);
   }
 
+  @Router.post("/group/sendMsg/:groupName")
+  async sendGroupMessage(session: WebSessionDoc, groupName: string, content: string) {
+    const user = WebSession.getUser(session);
+    const group = await Group.getGroupByName(groupName);
+    await Group.isGroupMember(user, groupName);
+    return await Message.sendGroupMessage(user, group._id, content);
+  }
+
+  @Router.get("/group/receiveMsg/:groupName")
+  async getGroupMessages(session: WebSessionDoc, groupName: string) {
+    const user = WebSession.getUser(session);
+    const group = await Group.getGroupByName(groupName);
+    await Group.isGroupMember(user, groupName);
+    return Responses.groupMessages(await Message.getMessagesInGroup(group._id));
+  }
+
   // @Router.get("/tasks")
   // async getTasks(session: WebSessionDoc) {}
 

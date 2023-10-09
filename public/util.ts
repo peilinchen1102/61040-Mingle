@@ -203,6 +203,18 @@ const operations: operation[] = [
     method: "DELETE",
     fields: { groupName: "input" },
   },
+  {
+    name: "Send Group Message",
+    endpoint: "/api/group/sendMsg/:groupName",
+    method: "POST",
+    fields: { groupName: "input", content: "input" },
+  },
+  {
+    name: "Get Group Messages",
+    endpoint: "/api/group/receiveMsg/:groupName",
+    method: "GET",
+    fields: { groupName: "input" },
+  },
 ];
 
 // Do not edit below here.

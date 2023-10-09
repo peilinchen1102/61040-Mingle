@@ -10,6 +10,7 @@ export interface MessageDoc extends BaseDoc {
 
 export default class MessageConcept {
   public readonly messages = new DocCollection<MessageDoc>("messages");
+  public readonly groupMessages = new DocCollection<MessageDoc>("groupMessages");
 
   async getMessages(user: ObjectId) {
     return await this.messages.readMany(
@@ -38,6 +39,15 @@ export default class MessageConcept {
     await this.canSendMessage(from, to);
     await this.messages.createOne({ from, to, content });
     return { msg: "Message sent!" };
+  }
+
+  async sendGroupMessage(from: ObjectId, to: ObjectId, content: string) {
+    await this.groupMessages.createOne({ from, to, content });
+    return { msg: "Group Message sent!" };
+  }
+
+  async getMessagesInGroup(group: ObjectId) {
+    return await this.groupMessages.readMany({ to: group });
   }
 
   private async canSendMessage(u1: ObjectId, u2: ObjectId) {

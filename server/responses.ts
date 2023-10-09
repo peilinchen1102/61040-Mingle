@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { User } from "./app";
+import { Group, User } from "./app";
 import { AlreadyFriendsError, FriendNotFoundError, FriendRequestAlreadyExistsError, FriendRequestDoc, FriendRequestNotFoundError } from "./concepts/friend";
 import { GroupDoc } from "./concepts/group";
 import { MessageDoc } from "./concepts/message";
@@ -80,6 +80,7 @@ export default class Responses {
     const members = await Promise.all(groups.map(async (group) => await User.idsToUsernames(group.members)));
     return groups.map((group, i) => ({ ...group, owner: usernames[i], members: members[i] }));
   }
+
   /**
    * Convert MessageDoc into more readable format for the frontend
    * by converting the ids into usernames.
@@ -89,6 +90,18 @@ export default class Responses {
     const to = messages.map((msg) => msg.to);
     const usernames = await User.idsToUsernames(from.concat(to));
     return messages.map((msg, i) => ({ ...msg, from: usernames[i], to: usernames[i + messages.length] }));
+  }
+
+  /**
+   * Convert MessageDoc into more readable format for the frontend
+   * by converting the user ids into usernames and group ids to group names.
+   */
+  static async groupMessages(messages: MessageDoc[]) {
+    const from = messages.map((msg) => msg.from);
+    const to = messages.map((msg) => msg.to);
+    const usernames = await User.idsToUsernames(from);
+    const groupNames = await Group.getGroupNameByIds(to);
+    return messages.map((msg, i) => ({ ...msg, from: usernames[i], to: groupNames[i] }));
   }
 }
 

@@ -1,12 +1,13 @@
 import { ObjectId } from "mongodb";
 import DocCollection, { BaseDoc } from "../framework/doc";
 import { NotAllowedError, NotFoundError, UnauthenticatedError } from "./errors";
+import { MessageDoc } from "./message";
 
 export interface GroupDoc extends BaseDoc {
   name: string;
   owner: ObjectId;
   members: Array<ObjectId>;
-  messages: Array<[ObjectId, string]>;
+  messages: Array<MessageDoc>;
 }
 
 export default class GroupConcept {
@@ -32,6 +33,14 @@ export default class GroupConcept {
       throw new NotFoundError(`Group not found!`);
     }
     return group;
+  }
+
+  async getGroupNameByIds(_ids: ObjectId[]) {
+    const groups = await this.groups.readMany({ _id: { $in: _ids } });
+    if (groups == null) {
+      throw new NotFoundError(`Group not found!`);
+    }
+    return groups.map((group) => group.name);
   }
 
   async join(user: ObjectId, name: string) {
@@ -81,6 +90,14 @@ export default class GroupConcept {
     }
   }
 
+  async isGroupMember(user: ObjectId, groupName: string) {
+    const group = await this.getGroupByName(groupName);
+    const members = group.members.map((member) => member.toString());
+    if (!members.includes(user.toString())) {
+      throw new UserNotInGroupError();
+    }
+  }
+
   private async canUserJoinGroup(user: ObjectId, group: ObjectId) {
     const maybeGroup = await this.groups.readOne({ _id: group, members: user });
     if (maybeGroup !== null) {
@@ -116,6 +133,12 @@ export default class GroupConcept {
 export class UserAlreadyInGroupError extends NotAllowedError {
   constructor() {
     super("You are already in the group!");
+  }
+}
+
+export class UserNotInGroupError extends NotAllowedError {
+  constructor() {
+    super("You are not a member of the group");
   }
 }
 
