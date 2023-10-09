@@ -168,10 +168,10 @@ const operations: operation[] = [
     fields: { to: "input", content: "input" },
   },
   {
-    name: "Get Groups",
-    endpoint: "/api/groups",
+    name: "Get Groups (empty for all groups you are in)",
+    endpoint: "/api/groups/:groupName",
     method: "GET",
-    fields: {},
+    fields: { groupName: "input" },
   },
   {
     name: "Create Group",

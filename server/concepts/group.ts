@@ -1,13 +1,12 @@
 import { ObjectId } from "mongodb";
 import DocCollection, { BaseDoc } from "../framework/doc";
 import { NotAllowedError, NotFoundError, UnauthenticatedError } from "./errors";
-import { MessageDoc } from "./message";
 
 export interface GroupDoc extends BaseDoc {
   name: string;
   owner: ObjectId;
   members: Array<ObjectId>;
-  messages: Array<MessageDoc>;
+  messages: Array<ObjectId>;
 }
 
 export default class GroupConcept {
@@ -22,9 +21,12 @@ export default class GroupConcept {
     return { msg: "Group successfully created!" };
   }
 
-  async getGroups(user: ObjectId) {
-    const groups = await this.groups.readMany({ members: user });
-    return groups;
+  async getGroups(user: ObjectId, groupName?: string) {
+    if (groupName) {
+      return await this.groups.readMany({ members: user, name: groupName }, { sort: { dateUpdated: -1 } });
+    } else {
+      return await this.groups.readMany({ members: user }, { sort: { dateUpdated: -1 } });
+    }
   }
 
   async getGroupByName(name: string) {
@@ -36,7 +38,7 @@ export default class GroupConcept {
   }
 
   async getGroupNameByIds(_ids: ObjectId[]) {
-    const groups = await this.groups.readMany({ _id: { $in: _ids } });
+    const groups = await this.groups.readMany({ _id: { $in: _ids } }, { sort: { dateUpdated: -1 } });
     if (groups == null) {
       throw new NotFoundError(`Group not found!`);
     }
@@ -96,6 +98,14 @@ export default class GroupConcept {
     if (!members.includes(user.toString())) {
       throw new UserNotInGroupError();
     }
+  }
+
+  async addMessage(groupName: string, messageId: ObjectId) {
+    const group = await this.getGroupByName(groupName);
+    const messages = group.messages;
+    messages.push(messageId);
+    await this.groups.updateOne({ _id: group._id }, { ...group, messages: messages });
+    return { msg: "Message added to group successfully!" };
   }
 
   private async canUserJoinGroup(user: ObjectId, group: ObjectId) {

@@ -9,8 +9,11 @@ export interface MessageDoc extends BaseDoc {
 }
 
 export default class MessageConcept {
-  public readonly messages = new DocCollection<MessageDoc>("messages");
-  public readonly groupMessages = new DocCollection<MessageDoc>("groupMessages");
+  public readonly messages: DocCollection<MessageDoc>;
+
+  constructor(type: string) {
+    this.messages = new DocCollection<MessageDoc>(type);
+  }
 
   async getMessages(user: ObjectId) {
     return await this.messages.readMany(
@@ -18,7 +21,7 @@ export default class MessageConcept {
         $or: [{ from: user }, { to: user }],
       },
       {
-        sort: { dateUpdated: -1 },
+        sort: { dateCreated: -1 },
       },
     );
   }
@@ -35,19 +38,14 @@ export default class MessageConcept {
     );
   }
 
+  async getMessagesByIds(_ids: ObjectId[]) {
+    return await this.messages.readMany({ _id: { $in: _ids } }, { sort: { dateCreated: -1 } });
+  }
+
   async sendMessage(from: ObjectId, to: ObjectId, content: string) {
     await this.canSendMessage(from, to);
-    await this.messages.createOne({ from, to, content });
-    return { msg: "Message sent!" };
-  }
-
-  async sendGroupMessage(from: ObjectId, to: ObjectId, content: string) {
-    await this.groupMessages.createOne({ from, to, content });
-    return { msg: "Group Message sent!" };
-  }
-
-  async getMessagesInGroup(group: ObjectId) {
-    return await this.groupMessages.readMany({ to: group });
+    const messageId = await this.messages.createOne({ from, to, content });
+    return { msg: "Message sent!", id: messageId };
   }
 
   private async canSendMessage(u1: ObjectId, u2: ObjectId) {

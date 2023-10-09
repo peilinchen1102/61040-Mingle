@@ -14,5 +14,6 @@ export const Post = new PostConcept();
 export const Friend = new FriendConcept();
 export const Profile = new ProfileConcept();
 export const Status = new StatusConcept();
-export const Message = new MessageConcept();
+export const Message = new MessageConcept("messages");
+export const GroupMessage = new MessageConcept("groupMessage");
 export const Group = new GroupConcept();

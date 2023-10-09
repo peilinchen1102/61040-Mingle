@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { Friend, Group, Message, Post, Profile, Status, User, WebSession } from "./app";
+import { Friend, Group, GroupMessage, Message, Post, Profile, Status, User, WebSession } from "./app";
 import { PostDoc, PostOptions } from "./concepts/post";
 import { ProfileDoc } from "./concepts/profile";
 import { StatusDoc } from "./concepts/status";
@@ -207,14 +207,18 @@ class Routes {
   async sendMessage(session: WebSessionDoc, to: string, content: string) {
     const u1 = WebSession.getUser(session);
     const u2 = (await User.getUserByUsername(to))._id;
-    return await Message.sendMessage(u1, u2, content);
+    return (await Message.sendMessage(u1, u2, content)).msg;
   }
-
   @Router.get("/groups")
   async getGroups(session: WebSessionDoc) {
     const user = WebSession.getUser(session);
-    console.log(await Group.getGroups(user));
     return Responses.groups(await Group.getGroups(user));
+  }
+
+  @Router.get("/groups/:groupName")
+  async getGroup(session: WebSessionDoc, groupName?: string) {
+    const user = WebSession.getUser(session);
+    return Responses.groups(await Group.getGroups(user, groupName));
   }
 
   @Router.post("/groups")
@@ -254,16 +258,18 @@ class Routes {
     const user = WebSession.getUser(session);
     const group = await Group.getGroupByName(groupName);
     await Group.isGroupMember(user, groupName);
-    return await Message.sendGroupMessage(user, group._id, content);
+    const message = await GroupMessage.sendMessage(user, group._id, content);
+    await Group.addMessage(groupName, message.id);
+    return message.msg;
   }
 
-  @Router.get("/group/receiveMsg/:groupName")
-  async getGroupMessages(session: WebSessionDoc, groupName: string) {
-    const user = WebSession.getUser(session);
-    const group = await Group.getGroupByName(groupName);
-    await Group.isGroupMember(user, groupName);
-    return Responses.groupMessages(await Message.getMessagesInGroup(group._id));
-  }
+  // @Router.get("/group/receiveMsg/:groupName")
+  // async getGroupMessages(session: WebSessionDoc, groupName: string) {
+  //   const user = WebSession.getUser(session);
+  //   const group = await Group.getGroupByName(groupName);
+  //   await Group.isGroupMember(user, groupName);
+  //   return Responses.groupMessages(await GroupMessage.getMessages(group._id));
+  // }
 
   // @Router.get("/tasks")
   // async getTasks(session: WebSessionDoc) {}

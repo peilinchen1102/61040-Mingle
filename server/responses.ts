@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { Group, User } from "./app";
+import { Group, GroupMessage, User } from "./app";
 import { AlreadyFriendsError, FriendNotFoundError, FriendRequestAlreadyExistsError, FriendRequestDoc, FriendRequestNotFoundError } from "./concepts/friend";
 import { GroupDoc } from "./concepts/group";
 import { MessageDoc } from "./concepts/message";
@@ -78,7 +78,8 @@ export default class Responses {
     }
     const usernames = await User.idsToUsernames(groups.map((group) => group.owner));
     const members = await Promise.all(groups.map(async (group) => await User.idsToUsernames(group.members)));
-    return groups.map((group, i) => ({ ...group, owner: usernames[i], members: members[i] }));
+    const messages = await Promise.all(groups.map(async (group) => await this.groupMessages(await GroupMessage.getMessagesByIds(group.messages))));
+    return groups.map((group, i) => ({ ...group, owner: usernames[i], members: members[i], messages: { ...messages } }));
   }
 
   /**
