@@ -78,8 +78,9 @@ export default class Responses {
     }
     const usernames = await User.idsToUsernames(groups.map((group) => group.owner));
     const members = await Promise.all(groups.map(async (group) => await User.idsToUsernames(group.members)));
-    const messages = await Promise.all(groups.map(async (group) => await this.groupMessages(await GroupMessage.getMessagesByIds(group.messages))));
-    return groups.map((group, i) => ({ ...group, owner: usernames[i], members: members[i], messages: { ...messages } }));
+    const messages = await Promise.all(groups.map(async (group) => await GroupMessage.getMessagesByIds(group.messages)));
+    const messagesWithUsernames = await Promise.all(messages.map(async (message) => await this.groupMessages(message)));
+    return groups.map((group, i) => ({ ...group, owner: usernames[i], members: members[i], messages: messagesWithUsernames[i] }));
   }
 
   /**

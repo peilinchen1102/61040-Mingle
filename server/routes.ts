@@ -216,7 +216,7 @@ class Routes {
   }
 
   @Router.get("/groups/:groupName")
-  async getGroup(session: WebSessionDoc, groupName?: string) {
+  async getGroupContent(session: WebSessionDoc, groupName?: string) {
     const user = WebSession.getUser(session);
     return Responses.groups(await Group.getGroups(user, groupName));
   }

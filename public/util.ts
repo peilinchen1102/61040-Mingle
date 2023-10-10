@@ -168,7 +168,7 @@ const operations: operation[] = [
     fields: { to: "input", content: "input" },
   },
   {
-    name: "Get Groups (empty for all groups you are in)",
+    name: "Get Groups and Messages (empty for all groups you are in)",
     endpoint: "/api/groups/:groupName",
     method: "GET",
     fields: { groupName: "input" },
@@ -208,12 +208,6 @@ const operations: operation[] = [
     endpoint: "/api/group/sendMsg/:groupName",
     method: "POST",
     fields: { groupName: "input", content: "input" },
-  },
-  {
-    name: "Get Group Messages",
-    endpoint: "/api/group/receiveMsg/:groupName",
-    method: "GET",
-    fields: { groupName: "input" },
   },
 ];
 

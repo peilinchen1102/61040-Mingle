@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import DocCollection, { BaseDoc } from "../framework/doc";
+import { NotFoundError } from "./errors";
 
 export interface TaskDoc extends BaseDoc {
   assigned: ObjectId;
@@ -7,15 +8,12 @@ export interface TaskDoc extends BaseDoc {
   status: "incomplete" | "completed";
 }
 
-export interface GroupTaskDoc extends BaseDoc {
-  assigned: ObjectId;
-  todo: string;
-  group: ObjectId;
-  status: "incomplete" | "completed";
-}
-
 export default class TaskConcept {
-  public readonly tasks = new DocCollection<TaskDoc>("tasks");
+  public readonly tasks: DocCollection<TaskDoc>;
+
+  constructor(type: string) {
+    this.tasks = new DocCollection<TaskDoc>(type);
+  }
 
   async getTasks(user: ObjectId) {
     return await this.tasks.readMany({ assigned: user });
@@ -34,5 +32,12 @@ export default class TaskConcept {
   async completeTask(user: ObjectId, _id: ObjectId) {
     await this.tasks.updateOne({ assigned: user, _id: _id }, { status: "completed" });
     return { msg: "Task successfully completed!" };
+  }
+
+  async taskExist(_id: ObjectId) {
+    const maybeTask = await this.tasks.readOne({ _id: _id });
+    if (maybeTask == null) {
+      throw new NotFoundError(`Task not found!`);
+    }
   }
 }

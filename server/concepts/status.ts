@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import DocCollection, { BaseDoc } from "../framework/doc";
-import { NotFoundError } from "./errors";
+import { NotAllowedError, NotFoundError } from "./errors";
 
 export interface StatusDoc extends BaseDoc {
   owner: ObjectId;
@@ -26,6 +26,7 @@ export default class StatusConcept {
   }
 
   async update(owner: ObjectId, update: Partial<StatusDoc>) {
+    this.sanitizeUpdate(update);
     await this.statuses.updateOne({ owner }, update);
     return { msg: "Status successfully updated!" };
   }
@@ -43,5 +44,11 @@ export default class StatusConcept {
       return true;
     }
     return false;
+  }
+
+  private sanitizeUpdate(update: Partial<StatusDoc>) {
+    if (update.userStatus !== "active" && update.userStatus !== "away" && update.userStatus !== "busy") {
+      throw new NotAllowedError(`User status can only be active, away, or busy`);
+    }
   }
 }

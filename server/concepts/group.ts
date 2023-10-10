@@ -50,7 +50,7 @@ export default class GroupConcept {
     await this.canUserJoinGroup(user, group._id);
     const members = group.members;
     members.push(user);
-    await this.groups.replaceOne({ _id: group._id }, { ...group, members: members });
+    await this.groups.updateOne({ _id: group._id }, { ...group, members: members });
     return { msg: "Joined group successfully!" };
   }
 
@@ -61,7 +61,7 @@ export default class GroupConcept {
     const idx = members.indexOf(user);
     members.splice(idx);
 
-    await this.groups.replaceOne({ _id: group._id }, { ...group, members: members });
+    await this.groups.updateOne({ _id: group._id }, { ...group, members: members });
     return { msg: "Left group successfully!" };
   }
 
@@ -80,7 +80,7 @@ export default class GroupConcept {
     const idx = members.indexOf(member);
     members.splice(idx);
 
-    await this.groups.replaceOne({ _id: group._id }, { ...group, members: members });
+    await this.groups.updateOne({ _id: group._id }, { members: members });
     return { msg: "Member successfully removed!" };
   }
 
@@ -104,7 +104,7 @@ export default class GroupConcept {
     const group = await this.getGroupByName(groupName);
     const messages = group.messages;
     messages.push(messageId);
-    await this.groups.updateOne({ _id: group._id }, { ...group, messages: messages });
+    await this.groups.updateOne({ _id: group._id }, { messages: messages });
     return { msg: "Message added to group successfully!" };
   }
 
