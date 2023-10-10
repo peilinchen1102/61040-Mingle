@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { Friend, Group, GroupMessage, Message, Post, Profile, Status, User, WebSession } from "./app";
+import { Friend, Group, GroupMessage, GroupTask, Message, Post, Profile, Status, Task, User, WebSession } from "./app";
 import { PostDoc, PostOptions } from "./concepts/post";
 import { ProfileDoc } from "./concepts/profile";
 import { StatusDoc } from "./concepts/status";
@@ -237,20 +237,26 @@ class Routes {
   @Router.patch("/group/leave/:groupName")
   async leaveGroup(session: WebSessionDoc, groupName: string) {
     const user = WebSession.getUser(session);
-    return await Group.leave(user, groupName);
+    const msg = await Group.leave(user, groupName);
+    await GroupTask.deleteAll(user);
+    return msg;
   }
 
   @Router.patch("/group/remove/:groupName")
   async removeGroupMember(session: WebSessionDoc, groupName: string, memberUsername: string) {
     const user = WebSession.getUser(session);
     const member = await User.getUserByUsername(memberUsername);
-    return await Group.removeMember(user, groupName, member._id);
+    const msg = await Group.removeMember(user, groupName, member._id);
+    await GroupTask.deleteAll(member._id);
+    return msg;
   }
 
   @Router.delete("/group/delete/:groupName")
   async deleteGroup(session: WebSessionDoc, groupName: string) {
     const user = WebSession.getUser(session);
-    return await Group.delete(user, groupName);
+    const msg = await Group.delete(user, groupName);
+    await GroupTask.deleteAll();
+    return msg;
   }
 
   @Router.post("/group/sendMsg/:groupName")
@@ -263,25 +269,61 @@ class Routes {
     return message.msg;
   }
 
-  // @Router.get("/group/receiveMsg/:groupName")
-  // async getGroupMessages(session: WebSessionDoc, groupName: string) {
-  //   const user = WebSession.getUser(session);
-  //   const group = await Group.getGroupByName(groupName);
-  //   await Group.isGroupMember(user, groupName);
-  //   return Responses.groupMessages(await GroupMessage.getMessages(group._id));
-  // }
+  @Router.get("/tasks")
+  async getTasks(session: WebSessionDoc) {
+    const user = WebSession.getUser(session);
+    return { personal: await Task.getTasks(user), group: await GroupTask.getTasks(user) };
+  }
 
-  // @Router.get("/tasks")
-  // async getTasks(session: WebSessionDoc) {}
+  @Router.post("/tasks/add")
+  async addTask(session: WebSessionDoc, content: string) {
+    const user = WebSession.getUser(session);
+    return await Task.addTask(user, content);
+  }
 
-  // @Router.post("/tasks/add/:group")
-  // async addTask(session: WebSessionDoc, group?: string) {}
+  @Router.post("/tasks/add/:groupName")
+  async assignTask(session: WebSessionDoc, groupName: string, to: string, content: string) {
+    const user = WebSession.getUser(session);
+    const assigned = (await User.getUserByUsername(to))._id;
+    const group = await Group.getGroupByName(groupName);
+    await Group.isGroupMember(user, groupName);
+    await Group.isGroupMember(assigned, groupName);
+    return await GroupTask.addTask(assigned, content, group._id);
+  }
 
-  // @Router.put("/tasks/complete/:group")
-  // async completeTask(session: WebSessionDoc, group?: string) {}
+  @Router.put("/tasks/complete")
+  async completeTask(session: WebSessionDoc, _id: ObjectId) {
+    const user = WebSession.getUser(session);
+    return await Task.completeTask(user, _id);
+  }
 
-  // @Router.get("/tasks/group/:group")
-  // async getGroupTasks(session: WebSessionDoc, group?: string) {}
+  @Router.put("/tasks/complete/:groupName")
+  async completeGroupTask(session: WebSessionDoc, _id: ObjectId, groupName: string) {
+    const user = WebSession.getUser(session);
+    await Group.isGroupMember(user, groupName);
+    return await GroupTask.completeTask(user, _id);
+  }
+
+  @Router.patch("/tasks/delete")
+  async deleteTask(session: WebSessionDoc, _id: ObjectId) {
+    const user = WebSession.getUser(session);
+    return await Task.deleteTask(user, _id);
+  }
+
+  @Router.patch("/tasks/delete/:groupName")
+  async deleteGroupTask(session: WebSessionDoc, _id: ObjectId, groupName: string) {
+    const user = WebSession.getUser(session);
+    await Group.isGroupMember(user, groupName);
+    return await GroupTask.deleteTask(user, _id);
+  }
+
+  @Router.get("/tasks/groups/:groupName")
+  async viewTasksInGroup(session: WebSessionDoc, groupName: string) {
+    const user = WebSession.getUser(session);
+    const group = await Group.getGroupByName(groupName);
+    await Group.isGroupMember(user, groupName);
+    return await GroupTask.viewTasksInGroup(group._id);
+  }
 
   // @Router.get("/matches")
   // async getMatches(session: WebSessionDoc) {}

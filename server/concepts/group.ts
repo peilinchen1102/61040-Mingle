@@ -96,7 +96,7 @@ export default class GroupConcept {
     const group = await this.getGroupByName(groupName);
     const members = group.members.map((member) => member.toString());
     if (!members.includes(user.toString())) {
-      throw new UserNotInGroupError();
+      throw new UserNotInGroupError(user);
     }
   }
 
@@ -147,8 +147,8 @@ export class UserAlreadyInGroupError extends NotAllowedError {
 }
 
 export class UserNotInGroupError extends NotAllowedError {
-  constructor() {
-    super("You are not a member of the group");
+  constructor(user: ObjectId) {
+    super("User {0} is not a member of the group", user);
   }
 }
 
