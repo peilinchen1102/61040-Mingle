@@ -1,10 +1,10 @@
 import FriendConcept from "./concepts/friend";
 import GroupConcept from "./concepts/group";
+import UserMatchConcept from "./concepts/match";
 import MessageConcept from "./concepts/message";
 import PostConcept from "./concepts/post";
 import ProfileConcept from "./concepts/profile";
 import StatusConcept from "./concepts/status";
-import SuggestionConcept from "./concepts/suggestion";
 import TaskConcept from "./concepts/task";
 import UserConcept from "./concepts/user";
 import WebSessionConcept from "./concepts/websession";
@@ -21,4 +21,4 @@ export const GroupMessage = new MessageConcept("groupMessages");
 export const Group = new GroupConcept();
 export const Task = new TaskConcept("tasks");
 export const GroupTask = new TaskConcept("groupTasks");
-export const Suggsetion = new SuggestionConcept();
+export const UserMatch = new UserMatchConcept();

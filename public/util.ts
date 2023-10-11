@@ -245,6 +245,18 @@ const operations: operation[] = [
     method: "GET",
     fields: { groupName: "input" },
   },
+  {
+    name: "Find Matches",
+    endpoint: "/api/matches",
+    method: "GET",
+    fields: {},
+  },
+  {
+    name: "Update Match Preferences",
+    endpoint: "/api/matches/preferences",
+    method: "PATCH",
+    fields: { update: { year: "input", class: "input", collaborationType: "input", groupSize: "input", hoursCommitted: "input", location: "input" } },
+  },
 ];
 
 // Do not edit below here.

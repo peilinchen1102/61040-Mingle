@@ -26,7 +26,9 @@ export default class StatusConcept {
   }
 
   async update(owner: ObjectId, update: Partial<StatusDoc>) {
-    this.sanitizeUpdate(update);
+    if (update.userStatus) {
+      this.sanitizeUpdate(update);
+    }
     await this.statuses.updateOne({ owner }, update);
     return { msg: "Status successfully updated!" };
   }
@@ -47,8 +49,15 @@ export default class StatusConcept {
   }
 
   private sanitizeUpdate(update: Partial<StatusDoc>) {
+    const allowedUpdates = ["userStatus", "curAssignment"];
     if (update.userStatus !== "active" && update.userStatus !== "away" && update.userStatus !== "busy") {
       throw new NotAllowedError(`User status can only be active, away, or busy`);
+    }
+
+    for (const key in update) {
+      if (!allowedUpdates.includes(key)) {
+        throw new NotAllowedError(`Cannot update '${key}' field!`);
+      }
     }
   }
 }

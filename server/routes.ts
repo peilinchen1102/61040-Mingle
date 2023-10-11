@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
-import { Friend, Group, GroupMessage, GroupTask, Message, Post, Profile, Status, Task, User, WebSession } from "./app";
+import { Friend, Group, GroupMessage, GroupTask, Message, Post, Profile, Status, Task, User, UserMatch, WebSession } from "./app";
+import { UserMatchDoc } from "./concepts/match";
 import { PostDoc, PostOptions } from "./concepts/post";
 import { ProfileDoc } from "./concepts/profile";
 import { StatusDoc } from "./concepts/status";
@@ -333,11 +334,20 @@ class Routes {
     return Responses.tasks(await GroupTask.viewTasksInGroup(group._id));
   }
 
-  // @Router.get("/matches")
-  // async getMatches(session: WebSessionDoc) {}
+  @Router.get("/matches")
+  async getMatches(session: WebSessionDoc) {
+    const user = WebSession.getUser(session);
+    const userIds = (await User.getUsers()).map((user) => user._id);
+    const matches = await UserMatch.getMatches(user, userIds);
+    const profiles = await Promise.all(matches.map(async (match) => await Profile.getProfile(match[0])));
+    return profiles.length ? Responses.profiles(profiles) : { msg: "No matches found, try updating your preferences!" };
+  }
 
-  // @Router.post("/matches/find")
-  // async requestMatch(session: WebSessionDoc, preferences: string) {}
+  @Router.patch("/matches/preferences")
+  async updatePreferences(session: WebSessionDoc, update: Partial<UserMatchDoc>) {
+    const user = WebSession.getUser(session);
+    return await UserMatch.updatePreferences(user, update);
+  }
 }
 
 export default getExpressRouter(new Routes());
