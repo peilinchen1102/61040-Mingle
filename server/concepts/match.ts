@@ -60,6 +60,10 @@ export default class UserMatchConcept {
     return common;
   }
 
+  async delete(user: ObjectId) {
+    await this.preferences.deleteOne({ owner: user });
+    return { msg: "Preferences successfully deleted!" };
+  }
   private sanitizeUpdate(update: Partial<UserMatchDoc>) {
     let key: keyof typeof update;
     for (key in update) {

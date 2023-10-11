@@ -52,7 +52,7 @@ class Routes {
   async deleteUser(session: WebSessionDoc) {
     const user = WebSession.getUser(session);
     WebSession.end(session);
-    return { user: await User.delete(user), profile: await Profile.delete(user), status: await Status.delete(user) };
+    return { user: await User.delete(user), profile: await Profile.delete(user), status: await Status.delete(user), preferences: await UserMatch.delete(user) };
   }
 
   @Router.post("/login")
