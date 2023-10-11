@@ -64,8 +64,11 @@ export default class Responses {
   /**
    * Same as {@link profile} but for an array of Profile for improved performance.
    */
-  static async profiles(profiles: ProfileDoc[]) {
-    const usernames = await User.idsToUsernames(profiles.map((profile) => profile.owner));
+  static async profiles(profiles: (ProfileDoc | null)[]) {
+    if (!profiles || profiles[0] === null) {
+      return [];
+    }
+    const usernames = await User.idsToUsernames(profiles.map((profile) => (profile as ProfileDoc).owner));
     return profiles.map((profile, i) => ({ ...profile, owner: usernames[i] }));
   }
 

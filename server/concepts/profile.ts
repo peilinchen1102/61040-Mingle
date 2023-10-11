@@ -43,6 +43,19 @@ export default class ProfileConcept {
     return { msg: "Profile deleted!" };
   }
 
+  async areProfilesSimilar(u1: ObjectId, others: ObjectId[]) {
+    const p1 = await this.profiles.readOne({ owner: u1 });
+    const suggestions = [];
+    for (const other of others) {
+      const p2 = await this.profiles.readOne({ owner: other });
+      const intersection = p1?.courses.filter((course) => p2?.courses.includes(course));
+      if (p1?.major === p2?.major || intersection) {
+        suggestions.push(p2);
+      }
+    }
+    return suggestions;
+  }
+
   private sanitizeUpdate(update: Partial<ProfileDoc>) {
     const allowedUpdates = ["name", "major", "year", "courses"];
     for (const key in update) {

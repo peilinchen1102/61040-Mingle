@@ -164,6 +164,13 @@ class Routes {
     return await Profile.update(user, update);
   }
 
+  @Router.get("/profile/suggestion")
+  async getSuggestions(session: WebSessionDoc) {
+    const user = WebSession.getUser(session);
+    const userIds = (await User.getUsers()).map((user) => user._id);
+    return Responses.profiles(await Profile.areProfilesSimilar(user, userIds));
+  }
+
   @Router.get("/status/:username")
   async getStatus(username: string) {
     const user = await User.getUserByUsername(username);

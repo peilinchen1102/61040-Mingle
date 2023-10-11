@@ -132,6 +132,12 @@ const operations: operation[] = [
     fields: { update: { name: "input", major: "input", year: "input", courses: "json" } },
   },
   {
+    name: "Get Suggested Profiles",
+    endpoint: "/api/profile/suggestion",
+    method: "GET",
+    fields: {},
+  },
+  {
     name: "Get Status",
     endpoint: "/api/status/:username",
     method: "GET",
