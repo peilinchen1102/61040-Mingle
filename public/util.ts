@@ -209,6 +209,36 @@ const operations: operation[] = [
     method: "POST",
     fields: { groupName: "input", content: "input" },
   },
+  {
+    name: "Get Tasks",
+    endpoint: "/api/tasks",
+    method: "GET",
+    fields: {},
+  },
+  {
+    name: "Assign Task",
+    endpoint: "/api/task/add/:groupName",
+    method: "POST",
+    fields: { groupName: "input", to: "input", content: "input" },
+  },
+  {
+    name: "Complete Task",
+    endpoint: "/api/task/complete/:groupName",
+    method: "PATCH",
+    fields: { _id: "input", groupName: "input" },
+  },
+  {
+    name: "Delete Task",
+    endpoint: "/api/task/delete/:groupName",
+    method: "PATCH",
+    fields: { _id: "input", groupName: "input" },
+  },
+  {
+    name: "View Tasks in Group",
+    endpoint: "/api/tasks/groups/:groupName",
+    method: "GET",
+    fields: { groupName: "input" },
+  },
 ];
 
 // Do not edit below here.

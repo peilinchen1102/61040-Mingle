@@ -5,6 +5,7 @@ import { GroupDoc } from "./concepts/group";
 import { MessageDoc } from "./concepts/message";
 import { PostAuthorNotMatchError, PostDoc } from "./concepts/post";
 import { ProfileDoc } from "./concepts/profile";
+import { GroupTaskDoc, TaskDoc } from "./concepts/task";
 import { Router } from "./framework/router";
 
 /**
@@ -104,6 +105,30 @@ export default class Responses {
     const usernames = await User.idsToUsernames(from);
     const groupNames = await Group.getGroupNameByIds(to);
     return messages.map((msg, i) => ({ ...msg, from: usernames[i], to: groupNames[i] }));
+  }
+
+  /**
+   * Convert TaskDoc or GroupDoc into more readable format for the frontend
+   * by converting the ids into usernames and group ids into group names.
+   */
+  static async tasks(tasks: TaskDoc[] | GroupTaskDoc[]) {
+    if (!tasks) {
+      return [];
+    }
+    const usernames = await User.idsToUsernames(tasks.map((task) => task.assigned));
+    let groupTask = false;
+
+    for (const key in tasks) {
+      if (key === "group") {
+        groupTask = true;
+      }
+    }
+    if (groupTask) {
+      const groupNames = await Group.getGroupNameByIds(tasks.map((task) => (task as GroupTaskDoc).group));
+      return tasks.map((task, i) => ({ ...task, assigned: usernames[i], group: groupNames[i] }));
+    } else {
+      return tasks.map((task, i) => ({ ...task, assigned: usernames[i] }));
+    }
   }
 }
 

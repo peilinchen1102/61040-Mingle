@@ -8,10 +8,7 @@ export interface TaskDoc extends BaseDoc {
   status: "incomplete" | "completed";
 }
 
-export interface GroupTaskDoc extends BaseDoc {
-  assigned: ObjectId;
-  todo: string;
-  status: "incomplete" | "completed";
+export interface GroupTaskDoc extends TaskDoc {
   group: ObjectId;
 }
 
@@ -30,7 +27,7 @@ export default class TaskConcept {
     return await this.tasks.readMany({ assigned: user });
   }
 
-  async viewTasksInGroup(group: ObjectId) {
+  async viewTasksInGroup(group: ObjectId): Promise<GroupTaskDoc[] | TaskDoc[]> {
     return await this.tasks.readMany({ group: group });
   }
 

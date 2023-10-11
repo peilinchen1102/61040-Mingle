@@ -272,17 +272,18 @@ class Routes {
   @Router.get("/tasks")
   async getTasks(session: WebSessionDoc) {
     const user = WebSession.getUser(session);
-    return { personal: await Task.getTasks(user), group: await GroupTask.getTasks(user) };
+    return { personal: await Responses.tasks(await Task.getTasks(user)), group: await Responses.tasks(await GroupTask.getTasks(user)) };
   }
 
-  @Router.post("/tasks/add")
+  @Router.post("/task/add")
   async addTask(session: WebSessionDoc, content: string) {
     const user = WebSession.getUser(session);
     return await Task.addTask(user, content);
   }
 
-  @Router.post("/tasks/add/:groupName")
-  async assignTask(session: WebSessionDoc, groupName: string, to: string, content: string) {
+  @Router.post("/task/add/:groupName")
+  async assignTask(session: WebSessionDoc, content: string, groupName: string, to: string) {
+    console.log(content, groupName, to);
     const user = WebSession.getUser(session);
     const assigned = (await User.getUserByUsername(to))._id;
     const group = await Group.getGroupByName(groupName);
@@ -291,26 +292,26 @@ class Routes {
     return await GroupTask.addTask(assigned, content, group._id);
   }
 
-  @Router.put("/tasks/complete")
+  @Router.patch("/task/complete")
   async completeTask(session: WebSessionDoc, _id: ObjectId) {
     const user = WebSession.getUser(session);
     return await Task.completeTask(user, _id);
   }
 
-  @Router.put("/tasks/complete/:groupName")
+  @Router.patch("/task/complete/:groupName")
   async completeGroupTask(session: WebSessionDoc, _id: ObjectId, groupName: string) {
     const user = WebSession.getUser(session);
     await Group.isGroupMember(user, groupName);
     return await GroupTask.completeTask(user, _id);
   }
 
-  @Router.patch("/tasks/delete")
+  @Router.patch("/task/delete")
   async deleteTask(session: WebSessionDoc, _id: ObjectId) {
     const user = WebSession.getUser(session);
     return await Task.deleteTask(user, _id);
   }
 
-  @Router.patch("/tasks/delete/:groupName")
+  @Router.patch("/task/delete/:groupName")
   async deleteGroupTask(session: WebSessionDoc, _id: ObjectId, groupName: string) {
     const user = WebSession.getUser(session);
     await Group.isGroupMember(user, groupName);
@@ -322,7 +323,7 @@ class Routes {
     const user = WebSession.getUser(session);
     const group = await Group.getGroupByName(groupName);
     await Group.isGroupMember(user, groupName);
-    return await GroupTask.viewTasksInGroup(group._id);
+    return Responses.tasks(await GroupTask.viewTasksInGroup(group._id));
   }
 
   // @Router.get("/matches")
